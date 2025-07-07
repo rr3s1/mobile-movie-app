@@ -1,68 +1,82 @@
-import {
-    View,
-    Text,
-    Image,
-    FlatList,
-    ActivityIndicator,
-} from "react-native";
-import React, { useState } from "react";
-import useFetch from "@/services/useFetch";
-import { fetchMovies } from "@/services/api";
+import { useState, useEffect } from "react";
+import { View, Text, ActivityIndicator, FlatList, Image } from "react-native";
+
 import { images } from "@/constants/images";
 import { icons } from "@/constants/icons";
+
+import useFetch from "../../services/useFetch";
+import { fetchMovies } from "@/services/api";
+
 import SearchBar from "@/components/SearchBar";
-import MovieCard from "@/components/MovieCard";
-import { Movie } from "@/interfaces/movie";
+import MovieDisplayCard from "@/components/MovieCard";
 
 const Search = () => {
-    // State to hold the user's search query
     const [searchQuery, setSearchQuery] = useState("");
-    // Custom hook to fetch movies, with auto-fetching disabled
+
     const {
-        data: movies,
+        data: movies = [],
         loading,
         error,
+        refetch: loadMovies,
+        reset,
     } = useFetch(() => fetchMovies({ query: searchQuery }), false);
 
+    const handleSearch = (text: string) => {
+        setSearchQuery(text);
+    };
+
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(async () => {
+            if (searchQuery.trim()) {
+                await loadMovies();
+
+                // Call updateSearchCount only if there are results
+                if (movies?.length! > 0 && movies?.[0]) {
+                    await updateSearchCount(searchQuery, movies[0]);
+                }
+            } else {
+                reset();
+            }
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery]);
+
     return (
-        // Main container with a primary background color
         <View className="flex-1 bg-primary">
-            {/* Background image for the screen */}
             <Image
                 source={images.bg}
                 className="flex-1 absolute w-full z-0"
                 resizeMode="cover"
             />
 
-            {/* FlatList to display search results in a scrollable grid */}
             <FlatList
                 className="px-5"
                 data={movies as Movie[]}
                 keyExtractor={(item) => item.id.toString()}
-                // Render a MovieCard for each item in the data array
-                renderItem={({ item }) => <MovieCard {...item} />}
+                renderItem={({ item }) => <MovieDisplayCard {...item} />}
                 numColumns={3}
-                // Style for the rows in the grid
                 columnWrapperStyle={{
                     justifyContent: "flex-start",
                     gap: 16,
                     marginVertical: 16,
                 }}
                 contentContainerStyle={{ paddingBottom: 100 }}
-                // Component to render at the top of the list
                 ListHeaderComponent={
                     <>
-                        {/* Application logo */}
                         <View className="w-full flex-row justify-center mt-20 items-center">
                             <Image source={icons.logo} className="w-12 h-10" />
                         </View>
 
-                        {/* Search bar component */}
                         <View className="my-5">
-                            <SearchBar placeholder="Search for a movie" />
+                            <SearchBar
+                                placeholder="Search for a movie"
+                                value={searchQuery}
+                                onChangeText={handleSearch}
+                            />
                         </View>
 
-                        {/* Display a loading indicator when data is being fetched */}
                         {loading && (
                             <ActivityIndicator
                                 size="large"
@@ -71,18 +85,16 @@ const Search = () => {
                             />
                         )}
 
-                        {/* Display an error message if the fetch fails */}
                         {error && (
                             <Text className="text-red-500 px-5 my-3">
                                 Error: {error.message}
                             </Text>
                         )}
 
-                        {/* Conditionally display the "Search Results" text */}
                         {!loading &&
                             !error &&
                             searchQuery.trim() &&
-                            movies?.length > 0 && (
+                            movies?.length! > 0 && (
                                 <Text className="text-xl text-white font-bold">
                                     Search Results for{" "}
                                     <Text className="text-accent">{searchQuery}</Text>
@@ -90,8 +102,20 @@ const Search = () => {
                             )}
                     </>
                 }
+                ListEmptyComponent={
+                    !loading && !error ? (
+                        <View className="mt-10 px-5">
+                            <Text className="text-center text-gray-500">
+                                {searchQuery.trim()
+                                    ? "No movies found"
+                                    : "Start typing to search for movies"}
+                            </Text>
+                        </View>
+                    ) : null
+                }
             />
         </View>
     );
 };
+
 export default Search;

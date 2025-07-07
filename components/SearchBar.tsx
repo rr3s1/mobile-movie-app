@@ -2,6 +2,12 @@ import { View, TextInput, Image } from "react-native";
 import { icons } from "@/constants/icons";
 
 import React from 'react'
+interface Props {
+    placeholder: string;
+    value?: string;
+    onChangeText?: (text: string) => void;
+    onPress?: () => void;
+}
 
 const SearchBar = ({ onPress, placeholder, value, onChangeText }) => {
     return (
