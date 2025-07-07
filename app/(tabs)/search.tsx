@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { View, Text, ActivityIndicator, FlatList, Image } from "react-native";
-
 import { images } from "@/constants/images";
 import { icons } from "@/constants/icons";
-
 import useFetch from "../../services/useFetch";
 import { fetchMovies } from "@/services/api";
-
 import SearchBar from "@/components/SearchBar";
 import MovieDisplayCard from "@/components/MovieCard";
+import {updateSearchCount} from "@/services/appwrite";
 
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState("");
