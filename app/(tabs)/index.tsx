@@ -12,6 +12,7 @@ import { fetchMovies } from "@/services/api";
 import { icons } from "@/constants/icons";
 import { images } from "@/constants/images";
 import SearchBar from "@/components/SearchBar";
+import MovieCard from "@/components/MovieCard";
 
 export default function Index() {
     const router = useRouter();
@@ -70,7 +71,9 @@ export default function Index() {
                                 data={movies}
                                 // Defines how each item is rendered
                                 renderItem={({ item }) => (
-                                    <Text className="text-white text-sm">{item.title}</Text>
+                                    <MovieCard
+                                        {...item}
+                                    />
                                 )}
                                 // Provides a unique key for each item
                                 keyExtractor={(item) => item.id.toString()}
