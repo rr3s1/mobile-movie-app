@@ -1,28 +1,27 @@
 import { Client, Databases, ID, Query } from "react-native-appwrite";
 
+// Environment variables for Appwrite configuration
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!;
 const COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!;
 
+// Initialize the Appwrite client
 const client = new Client()
     .setEndpoint("https://cloud.appwrite.io/v1")
     .setProject(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!);
 
+// Initialize the Appwrite database service
 const database = new Databases(client);
 
+// Updates the search count for a movie or creates a new entry if it doesn't exist
 export const updateSearchCount = async (query: string, movie: Movie) => {
-
-
-    // check if a search result has been stored
-    // if a document is found increment the searchCount to 1
-    //if no doc is found c
-        // create a new docuemnt in Appwrite DB ->  1
     try {
+        // Check if a document with the same search term already exists
         const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
             Query.equal("searchTerm", query),
-        ])
-        console.log(result);
+        ]);
 
         if (result.documents.length > 0) {
+            // If the document exists, increment its count
             const existingMovie = result.documents[0];
             await database.updateDocument(
                 DATABASE_ID,
@@ -33,6 +32,7 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
                 }
             );
         } else {
+            // If the document does not exist, create a new one
             await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
                 searchTerm: query,
                 movie_id: movie.id,
@@ -47,3 +47,21 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
     }
 };
 
+// Fetches the top 5 trending movies based on search count
+export const getTrendingMovies = async (): Promise<
+    TrendingMovie[] | undefined
+> => {
+    try {
+        const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+            // Limit the results to 5
+            Query.limit(5),
+            // Order the results by the 'count' field in descending order
+            Query.orderDesc("count"),
+        ]);
+
+        return result.documents as unknown as TrendingMovie[];
+    } catch (error) {
+        console.error(error);
+        return undefined;
+    }
+};
