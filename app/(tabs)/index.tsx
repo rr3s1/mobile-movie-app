@@ -70,7 +70,7 @@ const Index = () => {
                                         // Renders the custom card for each trending movie
                                         <TrendingCard movie={item} index={index} />
                                     )}
-                                    keyExtractor={(item) => item.movie_id.toString()}
+                                    keyExtractor={(item, index) => `trending_${item.movie_id}_${index}`}
                                 />
                             </View>
                         )}
@@ -79,7 +79,7 @@ const Index = () => {
                             <FlatList
                                 data={movies}
                                 renderItem={({ item }) => <MovieCard {...item} />}
-                                keyExtractor={(item) => item.id.toString()}
+                                keyExtractor={(item, index) => `latest_${item.id}_${index}`}
                                 numColumns={3}
                                 columnWrapperStyle={{
                                     justifyContent: "flex-start",

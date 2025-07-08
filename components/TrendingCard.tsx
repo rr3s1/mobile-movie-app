@@ -9,7 +9,7 @@ const TrendingCard = ({
                       }: TrendingCardProps) => {
     return (
         // Link component makes the entire card a navigational link
-        <Link href={`/movie/${movie_id}`} asChild>
+        <Link href={`/movies/${movie_id}`} asChild>
             <TouchableOpacity className="w-32 relative pl-5">
                 <Image
                     source={{ uri: poster_url }}

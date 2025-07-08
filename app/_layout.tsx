@@ -19,7 +19,7 @@ export default function RootLayout() {
           />
           {/* Defines the screen for displaying individual movie details. The header is also hidden. */}
           <Stack.Screen
-              name="movie/[id]"
+              name="movies/[id]"
               options={{headerShown: false}}
           />
         </Stack>
